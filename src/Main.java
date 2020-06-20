@@ -9,7 +9,7 @@ public class Main {
 		System.out.println("Identificador de notas de real");
 		Imagem imagem = new Imagem();
 		int op = -1;
-		String menu = "1. Carrega imagem \n2. Aplica filtros na imagem e realiza técnica de OCR em seguida \n"
+		String menu = "Menu \n1. Carrega imagem \n2. Aplica filtros na imagem e realiza técnica de OCR em seguida \n"
 				+ "3. Testa identificação de nota em todas as imagens da pasta notas \n0. Sai do programa";
 
 		do {
@@ -27,6 +27,26 @@ public class Main {
 					break;
 
 				case 2:
+					if (imagem.isExisteImg()==true) {
+						System.out.println("Sequencia de filtros");
+						System.out.println("Escala de cinza, binarização, eliminação de ruídos e detecção de bordas");
+						// começa aplicando filtro de cinza na imagem do programa
+						imagem.aplicaFiltroDeCinza(imagem.getCaminhoImg());
+						// filtro acima criará arquivo de imagem com nome 1 na pasta notas/processadas
+						// aplica binarização em cima de imagem de nome 1
+						imagem.aplicaBinarizacao("notas/processadas/1");
+						// filtro acima criará arquivo de imagem com nome 2 na pasta notas/processadas
+						// aplica eliminação de ruídos em cima de imagem de nome 2
+						imagem.aplicaEliminacaoDeRuidos("notas/processadas/2");
+						// filtro acima criará arquivo de imagem com nome 3 na pasta notas/processadas
+						// aplica detecção de bordas em cima de imagem de nome 3
+						imagem.aplicaDeteccaoDeBordaComSobel("notas/processadas/3");
+						// filtro acima criará arquivo de imagem com nome 4 na pasta notas/processadas
+						// agora na última imagem processada aplica o ocr do tesseract
+						// a fazer
+					} else {
+						System.out.println("Ainda não existe imagem no programa");
+					}
 					break;
 
 				case 3:
