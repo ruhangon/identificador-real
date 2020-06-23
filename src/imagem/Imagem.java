@@ -3,6 +3,7 @@ package imagem;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import javax.imageio.ImageIO;
@@ -23,24 +24,74 @@ public class Imagem {
 
 	// escolhe uma imagem para ser usada no programa
 	public void escolheImagem(Scanner scan) {
-		File cam;
+		int op = 0;
 		do {
 			try {
-				System.out.println("Digite o caminho da imagem");
-				System.out.print("caminho: ");
-				this.caminhoImg = scan.nextLine();
-				cam = new File(this.caminhoImg);
-				if (cam.exists()) {
-					this.existeImg = true;
-					descobreNome();
-					descobreExtensao();
-				} else {
-					System.out.println("a imagem do caminho passado não existe");
-				}
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println(
+						"Digite 1 para escolher uma imagem do seu computador, ou 2 para escolher uma da pasta notas");
+				System.out.print("opção: ");
+				op = scan.nextInt();
+				scan.nextLine();
+			} catch (InputMismatchException e) {
+				System.out.println("opção inválida");
+				scan.nextLine();
+				op = 0;
 			}
-		} while (this.existeImg != true);
+		} while ((op <= 1) && (op >= 2));
+		if (op == 1) {
+			File cam;
+			do {
+				try {
+					System.out.println("Digite o caminho da imagem");
+					System.out.print("caminho: ");
+					this.caminhoImg = scan.nextLine();
+					cam = new File(this.caminhoImg);
+					if (cam.exists()) {
+						this.existeImg = true;
+						descobreNome();
+						descobreExtensao();
+					} else {
+						System.out.println("a imagem do caminho passado não existe");
+					}
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
+			} while (this.existeImg != true);
+		}
+		if (op == 2) {
+			String[] nomesCaminho;
+			int opImg = -1;
+			// mostra lista de imagens da pasta notas
+			File arquivo = new File("notas");
+			nomesCaminho = arquivo.list();
+			System.out.println("\n-- Lista de arquivos --");
+			for (int i = 0; i < nomesCaminho.length; i++) {
+				System.out.println((i + 1) + ". " + nomesCaminho[i]);
+			}
+			// se houver um arquivo na pasta pelo menos, pede para escolher imagem
+			if (nomesCaminho.length > 0) {
+				// pede para usuário escolher uma imagem da lista
+				do {
+					try {
+						System.out.println("\nEscolha uma imagem da lista acima (arquivo com extensão de imagem)");
+						System.out.print("opção: ");
+						opImg = scan.nextInt();
+						scan.nextLine();
+						if ((opImg < 1) || (opImg > nomesCaminho.length))
+							System.out.println("opção inválida");
+					} catch (InputMismatchException e) {
+						System.out.println("opção inválida");
+						opImg = -1;
+						scan.nextLine();
+					}
+				} while ((opImg < 1) || (opImg > nomesCaminho.length));
+				this.caminhoImg = "notas/";
+				this.caminhoImg = this.caminhoImg.concat(nomesCaminho[opImg - 1]);
+				this.existeImg = true;
+				descobreNome();
+				descobreExtensao();
+			}
+		}
 	}
 
 	// aplica filtro de cinza com open cv
