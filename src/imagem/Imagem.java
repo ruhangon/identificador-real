@@ -15,6 +15,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.photo.Photo;
 
 public class Imagem {
+	private String nomeImg;
 	private String caminhoImg;
 	private String extensaoImg;
 	private boolean existeImg = false;
@@ -24,28 +25,31 @@ public class Imagem {
 	public void escolheImagem(Scanner scan) {
 		File cam;
 		do {
-			System.out.println("Digite o caminho da imagem");
-			System.out.print("caminho: ");
-			this.setCaminhoImg(scan.nextLine());
-			cam = new File(this.getCaminhoImg());
-			if (cam.exists()) {
-				this.setExisteImg(true);
-				descobreExtensao();
-			} else {
-				System.out.println("a imagem do caminho passado não existe");
+			try {
+				System.out.println("Digite o caminho da imagem");
+				System.out.print("caminho: ");
+				this.caminhoImg = scan.nextLine();
+				cam = new File(this.caminhoImg);
+				if (cam.exists()) {
+					this.existeImg = true;
+					descobreNome();
+					descobreExtensao();
+				} else {
+					System.out.println("a imagem do caminho passado não existe");
+				}
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
 			}
-		} while (this.isExisteImg() != true);
+		} while (this.existeImg != true);
 	}
 
 	// aplica filtro de cinza com open cv
-	public void aplicaFiltroDeCinza(String caminho) {
+	public void aplicaFiltroDeCinza() {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		caminho = caminho.concat(".");
-		caminho = caminho.concat(this.getExtensaoImg());
 		Mat dst = new Mat();
 		BufferedImage novaImagemBI = null;
 		try {
-			File img = new File(caminho);
+			File img = new File(this.caminhoImg);
 			BufferedImage imagemBI = ImageIO.read(img);
 			byte[] data = ((DataBufferByte) imagemBI.getRaster().getDataBuffer()).getData();
 			this.src = new Mat(imagemBI.getHeight(), imagemBI.getWidth(), CvType.CV_8UC3);
@@ -56,10 +60,13 @@ public class Imagem {
 			dst.get(0, 0, data1);
 			novaImagemBI = new BufferedImage(dst.cols(), dst.rows(), BufferedImage.TYPE_BYTE_GRAY);
 			novaImagemBI.getRaster().setDataElements(0, 0, dst.cols(), dst.rows(), data1);
-			String novo = "notas/processadas/1.";
-			novo = novo.concat(this.getExtensaoImg());
-			File resultado = new File(novo);
-			ImageIO.write(novaImagemBI, this.getExtensaoImg(), resultado);
+			String novoArquivo = "notas/processadas/";
+			novoArquivo = novoArquivo.concat(this.nomeImg);
+			novoArquivo = novoArquivo.concat(" - 1.");
+			novoArquivo = novoArquivo.concat(this.extensaoImg);
+			this.caminhoImg = novoArquivo; // usado para que o programa possa usar a nova imagem para o novo filtro
+			File resultado = new File(novoArquivo);
+			ImageIO.write(novaImagemBI, this.extensaoImg, resultado);
 			System.out.println("Primeira imagem processada salva na pasta notas/processadas (filtro de cinza)");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -67,16 +74,17 @@ public class Imagem {
 	}
 
 	// aplica binarização em cima de imagem em escala de cinza
-	public void aplicaBinarizacao(String caminho) {
+	public void aplicaBinarizacao() {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		caminho = caminho.concat(".");
-		caminho = caminho.concat(this.getExtensaoImg());
 		try {
-			this.src = Imgcodecs.imread(caminho);
+			this.src = Imgcodecs.imread(this.caminhoImg);
 			Mat dst = new Mat();
 			Imgproc.threshold(this.src, dst, 200, 500, Imgproc.THRESH_BINARY);
-			String novoArquivo = "notas/processadas/2.";
-			novoArquivo = novoArquivo.concat(this.getExtensaoImg());
+			String novoArquivo = "notas/processadas/";
+			novoArquivo = novoArquivo.concat(this.nomeImg);
+			novoArquivo = novoArquivo.concat(" - 2.");
+			novoArquivo = novoArquivo.concat(this.extensaoImg);
+			this.caminhoImg = novoArquivo; // usado para que o programa possa usar a nova imagem para o novo filtro
 			Imgcodecs.imwrite(novoArquivo, dst);
 			System.out.println("Segunda imagem processada salva na pasta notas/processadas (filtro de binarização)");
 		} catch (Exception e) {
@@ -85,16 +93,17 @@ public class Imagem {
 	}
 
 	// aplica eliminação de ruídos em cima de imagem binarizada
-	public void aplicaEliminacaoDeRuidos(String caminho) {
+	public void aplicaEliminacaoDeRuidos() {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		caminho = caminho.concat(".");
-		caminho = caminho.concat(this.getExtensaoImg());
 		try {
-			this.src = Imgcodecs.imread(caminho);
+			this.src = Imgcodecs.imread(this.caminhoImg);
 			Mat dst = new Mat();
 			Photo.fastNlMeansDenoising(this.src, dst);
-			String novoArquivo = "notas/processadas/3.";
-			novoArquivo = novoArquivo.concat(this.getExtensaoImg());
+			String novoArquivo = "notas/processadas/";
+			novoArquivo = novoArquivo.concat(this.nomeImg);
+			novoArquivo = novoArquivo.concat(" - 3.");
+			novoArquivo = novoArquivo.concat(this.extensaoImg);
+			this.caminhoImg = novoArquivo; // usado para que o programa possa usar a nova imagem para o novo filtro
 			Imgcodecs.imwrite(novoArquivo, dst);
 			System.out.println(
 					"Terceira imagem processada salva na pasta notas/processadas (filtro de eliminação de ruídos)");
@@ -104,12 +113,10 @@ public class Imagem {
 	}
 
 	// filtro de detecção de borda por Sobel
-	public void aplicaDeteccaoDeBordaComSobel(String caminho) {
+	public void aplicaDeteccaoDeBordaComSobel() {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		caminho = caminho.concat(".");
-		caminho = caminho.concat(this.getExtensaoImg());
 		try {
-			this.src = Imgcodecs.imread(caminho);
+			this.src = Imgcodecs.imread(this.caminhoImg);
 			Mat dst = new Mat();
 			Mat grad_x = new Mat();
 			Mat abs_grad_x = new Mat();
@@ -123,9 +130,13 @@ public class Imagem {
 			Imgproc.Sobel(this.src, grad_y, ddepth, 0, 1);
 			Core.convertScaleAbs(grad_y, abs_grad_y);
 			Core.addWeighted(abs_grad_x, 0.5, abs_grad_y, 0.5, 0, dst);
-			String nomeNovoArquivo = "notas/processadas/4.";
-			nomeNovoArquivo = nomeNovoArquivo.concat(this.getExtensaoImg());
-			Imgcodecs.imwrite(nomeNovoArquivo, dst);
+			String novoArquivo = "notas/processadas/";
+			novoArquivo = novoArquivo.concat(this.nomeImg);
+			novoArquivo = novoArquivo.concat(" - 4.");
+			novoArquivo = novoArquivo.concat(this.extensaoImg);
+			this.caminhoImg = novoArquivo; // usado para que o programa possa usar a nova imagem para outros
+											// procedimentos
+			Imgcodecs.imwrite(novoArquivo, dst);
 			System.out.println(
 					"Quarta imagem processada salva na pasta notas/processadas (filtro de detecção de borda por Sobel)");
 		} catch (Exception e) {
@@ -133,16 +144,30 @@ public class Imagem {
 		}
 	}
 
+	// descobre o nome da imagem
+	private void descobreNome() {
+		int posInicial = 0;
+		if (this.caminhoImg.contains("/")) {
+			posInicial = this.caminhoImg.lastIndexOf("/");
+			posInicial++; // para pegar a posição após a barra
+		}
+		int posFinal = this.caminhoImg.indexOf(".");
+		this.nomeImg = this.caminhoImg.substring(posInicial, posFinal);
+	}
+
 	// descobre a extensão do arquivo, exemplo .jpg
 	private void descobreExtensao() {
-		int localExt = -1; // pega a posição do ponto na palavra
-		for (int i = 0; i < this.getCaminhoImg().length(); i++) {
-			if (this.getCaminhoImg().charAt(i) == ('.')) {
-				localExt = i + 1;
-				break;
-			}
-		}
-		this.extensaoImg = this.getCaminhoImg().substring(localExt, this.getCaminhoImg().length());
+		int localExt = this.caminhoImg.indexOf(".");
+		localExt++;
+		this.extensaoImg = this.caminhoImg.substring(localExt, this.caminhoImg.length());
+	}
+
+	public String getNomeImg() {
+		return nomeImg;
+	}
+
+	public void setNomeImg(String nomeImg) {
+		this.nomeImg = nomeImg;
 	}
 
 	public String getCaminhoImg() {
