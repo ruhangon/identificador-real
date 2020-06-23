@@ -7,9 +7,10 @@ public class Main {
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
 		System.out.println("Identificador de notas de real");
+		System.out.println("Processamento digital das imagens, que receberão o OCR");
 		Imagem imagem = new Imagem();
 		int op = -1;
-		String menu = "Menu \n1. Carrega imagem \n2. Aplica filtros na imagem e realiza técnica de OCR em seguida \n"
+		String menu = "Menu \n1. Carrega imagem \n2. Aplica filtros na imagem \n"
 				+ "3. Testa identificação de nota em todas as imagens da pasta notas \n0. Sai do programa";
 
 		do {
@@ -27,7 +28,7 @@ public class Main {
 					break;
 
 				case 2:
-					if (imagem.isExisteImg()==true) {
+					if (imagem.isExisteImg() == true) {
 						System.out.println("Sequencia de filtros");
 						System.out.println("Escala de cinza, binarização, eliminação de ruídos e detecção de bordas");
 						// começa aplicando filtro de cinza na imagem do programa
@@ -42,14 +43,13 @@ public class Main {
 						// aplica detecção de bordas em cima de imagem de nome 3
 						imagem.aplicaDeteccaoDeBordaComSobel("notas/processadas/3");
 						// filtro acima criará arquivo de imagem com nome 4 na pasta notas/processadas
-						// agora na última imagem processada aplica o ocr do tesseract
-						// a fazer
 					} else {
 						System.out.println("Ainda não existe imagem no programa");
 					}
 					break;
 
 				case 3:
+					// a fazer
 					break;
 
 				case 0:
@@ -60,7 +60,7 @@ public class Main {
 					break;
 				}
 			} catch (InputMismatchException e) {
-				System.out.println("opção inválida");
+				System.out.println("\nopção inválida");
 				scan.nextLine();
 				op = -1;
 			}
