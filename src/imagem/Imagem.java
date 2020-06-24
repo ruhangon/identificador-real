@@ -130,7 +130,7 @@ public class Imagem {
 		try {
 			this.src = Imgcodecs.imread(this.caminhoImg);
 			Mat dst = new Mat();
-			Imgproc.threshold(this.src, dst, 200, 500, Imgproc.THRESH_BINARY);
+			Imgproc.threshold(this.src, dst, 70, 255, Imgproc.THRESH_BINARY);
 			String novoArquivo = "notas/processadas/";
 			novoArquivo = novoArquivo.concat(this.nomeImg);
 			novoArquivo = novoArquivo.concat(" - 2.");
